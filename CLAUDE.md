@@ -2,8 +2,8 @@
 
 Private custom integration (not for HACS or core). Replaces two trigger-template sensors
 (`sensor.reminders`, `sensor.dynamic_reminders`) that lost data when a Jinja render failed.
-Target: Home Assistant 2026.10.4. Tests were run on HA 2026.2.3 (newest that ran in the
-build environment's Python 3.13).
+Target: Home Assistant 2026.10.4. All tests pass on HA 2026.10.4 (Python 3.14,
+pytest-homeassistant-custom-component 0.13.375), checked 2026-10-31.
 
 ## Layout
 - `custom_components/reminders/` – the integration (domain `reminders`)
@@ -16,7 +16,8 @@ build environment's Python 3.13).
 - `tests/` – pytest-homeassistant-custom-component tests (`pytest.ini` sets asyncio auto mode)
 - `README.md` – user-facing install steps and examples
 
-Run tests: `pip install pytest-homeassistant-custom-component && python -m pytest tests`
+Run tests (HA 2026.10 needs Python 3.14):
+`uv venv -p 3.14 .venv && VIRTUAL_ENV=.venv uv pip install pytest-homeassistant-custom-component && .venv/bin/python -m pytest tests`
 
 ## Agreed design decisions (from the user)
 - Sensors have no device. State = item count, always `len()` of the collection.
