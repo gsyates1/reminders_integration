@@ -1,0 +1,13 @@
+{
+  "domain": "reminders",
+  "name": "Reminders",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "1.0.0"
+}

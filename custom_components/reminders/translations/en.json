@@ -1,0 +1,69 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Reminders",
+        "description": "Creates sensor.reminders and sensor.dynamic_reminders and the reminders.* actions."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Reminders is already set up."
+    }
+  },
+  "services": {
+    "add": {
+      "name": "Add reminder",
+      "description": "Adds a reminder and returns its new ID.",
+      "fields": {
+        "reminder": { "name": "Reminder", "description": "Reminder text." }
+      }
+    },
+    "acknowledge": {
+      "name": "Acknowledge reminder",
+      "description": "Removes one reminder. Fails if the ID does not exist.",
+      "fields": {
+        "id": { "name": "ID", "description": "ID returned when the reminder was added." }
+      }
+    },
+    "acknowledge_all": {
+      "name": "Acknowledge all reminders",
+      "description": "Removes all reminders."
+    },
+    "clear_all": {
+      "name": "Clear all reminders",
+      "description": "Removes all reminders."
+    },
+    "add_dynamic": {
+      "name": "Add dynamic reminder",
+      "description": "Adds a dynamic reminder and returns its new ID.",
+      "fields": {
+        "reminder": { "name": "Reminder", "description": "Reminder text." },
+        "next_trigger_time": { "name": "Next trigger time", "description": "Date and time. Without an offset it is taken as Home Assistant local time." },
+        "repeat_frequency": { "name": "Repeat frequency", "description": "Whole days between repeats; 0 means do not repeat." },
+        "nag": { "name": "Nag", "description": "Whether to nag." }
+      }
+    },
+    "update_dynamic": {
+      "name": "Update dynamic reminder",
+      "description": "Changes only the fields given. Fails if the ID does not exist.",
+      "fields": {
+        "id": { "name": "ID", "description": "ID returned when the dynamic reminder was added." },
+        "reminder": { "name": "Reminder", "description": "New reminder text." },
+        "next_trigger_time": { "name": "Next trigger time", "description": "New date and time. Without an offset it is taken as Home Assistant local time." },
+        "repeat_frequency": { "name": "Repeat frequency", "description": "Whole days between repeats; 0 means do not repeat." },
+        "nag": { "name": "Nag", "description": "Whether to nag." }
+      }
+    },
+    "delete_dynamic": {
+      "name": "Delete dynamic reminder",
+      "description": "Removes one dynamic reminder. Fails if the ID does not exist.",
+      "fields": {
+        "id": { "name": "ID", "description": "ID of the dynamic reminder." }
+      }
+    },
+    "clear_all_dynamic": {
+      "name": "Clear all dynamic reminders",
+      "description": "Removes all dynamic reminders."
+    }
+  }
+}

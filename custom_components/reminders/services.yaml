@@ -1,0 +1,86 @@
+add:
+  fields:
+    reminder:
+      required: true
+      example: "Take out the trash"
+      selector:
+        text:
+
+acknowledge:
+  fields:
+    id:
+      required: true
+      example: "a3f9c21e"
+      selector:
+        text:
+
+acknowledge_all:
+
+clear_all:
+
+add_dynamic:
+  fields:
+    reminder:
+      required: true
+      example: "Change the furnace filter"
+      selector:
+        text:
+    next_trigger_time:
+      required: true
+      example: "2026-11-01 09:00:00"
+      selector:
+        datetime:
+    repeat_frequency:
+      required: true
+      example: 30
+      selector:
+        number:
+          min: 0
+          max: 3650
+          step: 1
+          mode: box
+          unit_of_measurement: days
+    nag:
+      required: true
+      example: false
+      selector:
+        boolean:
+
+update_dynamic:
+  fields:
+    id:
+      required: true
+      example: "a3f9c21e"
+      selector:
+        text:
+    reminder:
+      required: false
+      selector:
+        text:
+    next_trigger_time:
+      required: false
+      selector:
+        datetime:
+    repeat_frequency:
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 3650
+          step: 1
+          mode: box
+          unit_of_measurement: days
+    nag:
+      required: false
+      selector:
+        boolean:
+
+delete_dynamic:
+  fields:
+    id:
+      required: true
+      example: "a3f9c21e"
+      selector:
+        text:
+
+clear_all_dynamic:
