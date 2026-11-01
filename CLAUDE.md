@@ -1,6 +1,6 @@
 # Reminders – custom Home Assistant integration
 
-Private custom integration (not for HACS or core). Replaces two trigger-template sensors
+Custom integration, installed via HACS as a custom repository (not in the default HACS store, not for core). Replaces two trigger-template sensors
 (`sensor.reminders`, `sensor.dynamic_reminders`) that lost data when a Jinja render failed.
 Target: Home Assistant 2026.10.4. All tests pass on HA 2026.10.4 (Python 3.14,
 pytest-homeassistant-custom-component 0.13.375), checked 2026-10-31.
@@ -15,6 +15,11 @@ pytest-homeassistant-custom-component 0.13.375), checked 2026-10-31.
   - `config_flow.py` – single confirm step; `single_config_entry` in manifest
 - `tests/` – pytest-homeassistant-custom-component tests (`pytest.ini` sets asyncio auto mode)
 - `README.md` – user-facing install steps and examples
+- `hacs.json` – HACS metadata (min HA version). `.github/workflows/validate.yml` – HACS validation + hassfest
+
+## Releasing
+HACS offers updates from GitHub releases. To release: bump `version` in `manifest.json`, merge,
+then publish a GitHub release tagged `vX.Y.Z` matching that version.
 
 Run tests (HA 2026.10 needs Python 3.14):
 `uv venv -p 3.14 .venv && VIRTUAL_ENV=.venv uv pip install pytest-homeassistant-custom-component && .venv/bin/python -m pytest tests`

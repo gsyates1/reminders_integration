@@ -1,12 +1,13 @@
 {
   "domain": "reminders",
   "name": "Reminders",
-  "codeowners": [],
+  "codeowners": ["@gsyates1"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://www.home-assistant.io",
+  "documentation": "https://github.com/gsyates1/reminders_integration",
   "integration_type": "service",
   "iot_class": "calculated",
+  "issue_tracker": "https://github.com/gsyates1/reminders_integration/issues",
   "requirements": [],
   "single_config_entry": true,
   "version": "1.0.0"

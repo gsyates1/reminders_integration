@@ -8,10 +8,17 @@ Replaces the `sensor.reminders` and `sensor.dynamic_reminders` trigger-template 
    Then go to **Settings → Devices & services → Entities**, find `sensor.reminders` and
    `sensor.dynamic_reminders` (now shown as "no longer provided"), and delete them. If you skip
    this, the new sensors are created as `sensor.reminders_2` / `sensor.dynamic_reminders_2`.
-2. Copy the `custom_components/reminders` folder into your HA config folder so you have
-   `config/custom_components/reminders/manifest.json`.
+2. Install the integration, either with HACS (recommended) or by hand:
+   - **HACS:** open HACS → ⋮ (top right) → **Custom repositories**. Paste
+     `https://github.com/gsyates1/reminders_integration`, choose type **Integration**, and click
+     **Add**. Then search HACS for **Reminders** and click **Download**.
+   - **By hand:** copy the `custom_components/reminders` folder into your HA config folder so you
+     have `config/custom_components/reminders/manifest.json`.
 3. Restart Home Assistant.
 4. **Settings → Devices & services → Add integration → Reminders → Submit.**
+
+Updates: with HACS, new releases show up under **Settings → Updates**. By hand, copy the folder
+again and restart.
 
 Both sensors start at 0. Data is kept in `config/.storage/reminders.data` (atomic writes) and
 survives restarts. Removing the integration leaves that file in place, so re-adding it brings the
