@@ -28,3 +28,7 @@ SERVICE_ADD_DYNAMIC = "add_dynamic"
 SERVICE_UPDATE_DYNAMIC = "update_dynamic"
 SERVICE_DELETE_DYNAMIC = "delete_dynamic"
 SERVICE_CLEAR_ALL_DYNAMIC = "clear_all_dynamic"
+
+# Events fired on the HA event bus (names chosen by the user, not domain-prefixed)
+EVENT_REMINDER_ACKNOWLEDGED = "reminder_acknowledged"
+EVENT_ALL_REMINDERS_ACKNOWLEDGED = "all_reminders_acknowledged"

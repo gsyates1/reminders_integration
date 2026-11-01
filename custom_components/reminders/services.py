@@ -20,7 +20,10 @@ from .const import (
     ATTR_NEXT_TRIGGER_TIME,
     ATTR_REMINDER,
     ATTR_REPEAT_FREQUENCY,
+    ATTR_REMINDERS,
     DOMAIN,
+    EVENT_ALL_REMINDERS_ACKNOWLEDGED,
+    EVENT_REMINDER_ACKNOWLEDGED,
     SERVICE_ACKNOWLEDGE,
     SERVICE_ACKNOWLEDGE_ALL,
     SERVICE_ADD,
@@ -61,7 +64,9 @@ SCHEMA_UPDATE_DYNAMIC = vol.All(
     cv.has_at_least_one_key(*_UPDATE_FIELDS),
 )
 
-type _Action = Callable[[ReminderManager, dict[str, Any]], Awaitable[dict[str, Any] | None]]
+type _Action = Callable[
+    [ServiceCall, ReminderManager, dict[str, Any]], Awaitable[dict[str, Any] | None]
+]
 
 
 def _get_manager(hass: HomeAssistant) -> ReminderManager:
@@ -80,22 +85,36 @@ def _validate(name: str, schema: Callable[[Any], Any], raw: dict[str, Any]) -> d
         raise ServiceValidationError(f"{DOMAIN}.{name}: {message}") from err
 
 
+def _fire(call: ServiceCall, event_type: str, event_data: dict[str, Any]) -> None:
+    _LOGGER.debug("Firing event %s with %s", event_type, event_data)
+    call.hass.bus.async_fire(event_type, event_data, context=call.context)
+
+
 # ---- action bodies --------------------------------------------------------
 
 
-async def _add(mgr: ReminderManager, data: dict[str, Any]) -> dict[str, Any]:
+async def _add(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> dict[str, Any]:
     return {"id": await mgr.async_add(data[ATTR_REMINDER])}
 
 
-async def _acknowledge(mgr: ReminderManager, data: dict[str, Any]) -> None:
-    await mgr.async_acknowledge(data[ATTR_ID])
+async def _acknowledge(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> None:
+    item_id = data[ATTR_ID]
+    text = await mgr.async_acknowledge(item_id)
+    # Fired only after the change is saved; a failed call fires nothing.
+    _fire(call, EVENT_REMINDER_ACKNOWLEDGED, {ATTR_ID: item_id, ATTR_REMINDER: text})
 
 
-async def _clear(mgr: ReminderManager, data: dict[str, Any]) -> None:
+async def _acknowledge_all(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> None:
+    removed = await mgr.async_clear()
+    # Fired even when the list was already empty, so the call is always visible.
+    _fire(call, EVENT_ALL_REMINDERS_ACKNOWLEDGED, {ATTR_REMINDERS: removed})
+
+
+async def _clear(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> None:
     await mgr.async_clear()
 
 
-async def _add_dynamic(mgr: ReminderManager, data: dict[str, Any]) -> dict[str, Any]:
+async def _add_dynamic(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> dict[str, Any]:
     new_id = await mgr.async_add_dynamic(
         data[ATTR_REMINDER],
         data[ATTR_NEXT_TRIGGER_TIME],
@@ -105,23 +124,23 @@ async def _add_dynamic(mgr: ReminderManager, data: dict[str, Any]) -> dict[str, 
     return {"id": new_id}
 
 
-async def _update_dynamic(mgr: ReminderManager, data: dict[str, Any]) -> None:
+async def _update_dynamic(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> None:
     changes = {key: data[key] for key in _UPDATE_FIELDS if key in data}
     await mgr.async_update_dynamic(data[ATTR_ID], changes)
 
 
-async def _delete_dynamic(mgr: ReminderManager, data: dict[str, Any]) -> None:
+async def _delete_dynamic(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> None:
     await mgr.async_delete_dynamic(data[ATTR_ID])
 
 
-async def _clear_dynamic(mgr: ReminderManager, data: dict[str, Any]) -> None:
+async def _clear_dynamic(call: ServiceCall, mgr: ReminderManager, data: dict[str, Any]) -> None:
     await mgr.async_clear_dynamic()
 
 
 _ACTIONS: list[tuple[str, Callable[[Any], Any], _Action, SupportsResponse]] = [
     (SERVICE_ADD, SCHEMA_ADD, _add, SupportsResponse.OPTIONAL),
     (SERVICE_ACKNOWLEDGE, SCHEMA_ID, _acknowledge, SupportsResponse.NONE),
-    (SERVICE_ACKNOWLEDGE_ALL, SCHEMA_NONE, _clear, SupportsResponse.NONE),
+    (SERVICE_ACKNOWLEDGE_ALL, SCHEMA_NONE, _acknowledge_all, SupportsResponse.NONE),
     (SERVICE_CLEAR_ALL, SCHEMA_NONE, _clear, SupportsResponse.NONE),
     (SERVICE_ADD_DYNAMIC, SCHEMA_ADD_DYNAMIC, _add_dynamic, SupportsResponse.OPTIONAL),
     (SERVICE_UPDATE_DYNAMIC, SCHEMA_UPDATE_DYNAMIC, _update_dynamic, SupportsResponse.NONE),
@@ -147,7 +166,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
             _LOGGER.debug("Action %s.%s called with %s", DOMAIN, name, raw)
             manager = _get_manager(hass)
             data = _validate(name, schema, raw)
-            result = await action(manager, data)
+            result = await action(call, manager, data)
             if result is None:
                 _LOGGER.debug("Action %s.%s done", DOMAIN, name)
             else:

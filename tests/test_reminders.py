@@ -202,3 +202,42 @@ async def test_service_descriptions(hass, hass_storage):
     assert set(desc) == {"add", "acknowledge", "acknowledge_all", "clear_all", "add_dynamic",
                          "update_dynamic", "delete_dynamic", "clear_all_dynamic"}
     assert "next_trigger_time" in desc["add_dynamic"]["fields"]
+
+
+async def test_acknowledge_events(hass, hass_storage):
+    from pytest_homeassistant_custom_component.common import async_capture_events
+
+    await _setup(hass)
+    single = async_capture_events(hass, "reminder_acknowledged")
+    every = async_capture_events(hass, "all_reminders_acknowledged")
+
+    r1 = (await call(hass, "add", {"reminder": "Trash"}, True))["id"]
+    r2 = (await call(hass, "add", {"reminder": "Mail"}, True))["id"]
+
+    await call(hass, "acknowledge", {"id": r1})
+    await hass.async_block_till_done()
+    assert len(single) == 1
+    assert single[0].data == {"id": r1, "reminder": "Trash"}
+
+    # failed acknowledge fires nothing
+    with pytest.raises(ServiceValidationError):
+        await call(hass, "acknowledge", {"id": r1})
+    await hass.async_block_till_done()
+    assert len(single) == 1
+
+    await call(hass, "acknowledge_all")
+    await hass.async_block_till_done()
+    assert len(every) == 1
+    assert every[0].data == {"reminders": {r2: "Mail"}}
+
+    # still fired when the list is already empty
+    await call(hass, "acknowledge_all")
+    await hass.async_block_till_done()
+    assert len(every) == 2
+    assert every[1].data == {"reminders": {}}
+
+    # clear_all does not fire the acknowledge event
+    await call(hass, "add", {"reminder": "x"})
+    await call(hass, "clear_all")
+    await hass.async_block_till_done()
+    assert len(every) == 2 and len(single) == 1

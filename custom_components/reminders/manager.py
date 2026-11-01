@@ -123,18 +123,23 @@ class ReminderManager:
             await self._async_commit(new)
             return new_id
 
-    async def async_acknowledge(self, item_id: str) -> None:
+    async def async_acknowledge(self, item_id: str) -> str:
+        """Remove a reminder and return its text."""
         async with self._lock:
             self._require(KEY_REMINDERS, item_id)
             new = copy.deepcopy(self._data)
-            del new[KEY_REMINDERS][item_id]
+            text = new[KEY_REMINDERS].pop(item_id)
             await self._async_commit(new)
+            return text
 
-    async def async_clear(self) -> None:
+    async def async_clear(self) -> dict[str, str]:
+        """Remove all reminders and return what was removed ({id: text})."""
         async with self._lock:
+            removed = self._data[KEY_REMINDERS]
             new = copy.deepcopy(self._data)
             new[KEY_REMINDERS] = {}
             await self._async_commit(new)
+            return removed
 
     # ---- dynamic reminders ---------------------------------------------
 

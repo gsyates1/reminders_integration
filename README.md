@@ -89,6 +89,26 @@ Reading the data in templates works as before:
 {% endfor %}
 ```
 
+## Events
+
+| Event | Fired by | Event data |
+|---|---|---|
+| `reminder_acknowledged` | `reminders.acknowledge` | `id`, `reminder` (the text of the acknowledged reminder) |
+| `all_reminders_acknowledged` | `reminders.acknowledge_all` | `reminders`: `{id: "text"}` of everything that was cleared (`{}` if the list was already empty) |
+
+Events are fired only after the change is saved, so a rejected call (e.g. unknown ID) fires
+nothing. `reminders.clear_all` does not fire an event.
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: reminder_acknowledged
+actions:
+  - action: notify.notify
+    data:
+      message: "Done: {{ trigger.event.data.reminder }}"
+```
+
 ## Logging
 
 **Settings → Devices & services → Reminders → ⋮ → Enable debug logging.** While on, every

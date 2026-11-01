@@ -39,5 +39,9 @@ Run tests (HA 2026.10 needs Python 3.14):
 - Logging: HA's built-in per-integration "Enable debug logging". Every action call is logged at
   debug with its data *before* validation (actions registered with `schema=None` and validated in
   the handler), so rejected calls are logged too.
+- Events (names as given by the user, not domain-prefixed), fired after the change is saved:
+  `acknowledge` → `reminder_acknowledged` `{id, reminder}`; `acknowledge_all` →
+  `all_reminders_acknowledged` `{reminders: {id: text}}` (fired even if already empty).
+  `clear_all` fires nothing.
 - No import from the old template sensors. Nothing else listened to the old events.
 - If the storage file can't be loaded, setup fails with ConfigEntryError and the file is left untouched.
